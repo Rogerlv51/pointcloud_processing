@@ -16,27 +16,27 @@ class K_Means(object):
 
         # step 1 随机选取k个点为初始聚类中心点
         self.centers = np.empty((0,data.shape[1]))
-        for i in np.random.choice(data.shape[0],self.k_):
+        for i in np.random.choice(data.shape[0],self.k_):   # 在原始数据中随机生成k个索引
             self.centers = np.append(self.centers,[data[i]],axis=0)
 
-        # step 2 开始循环聚类
+        # step 2 开始循环聚类，超过最大迭代次数或者误差容忍度达到要求时停止
         num_iter = 0                                        # 迭代次数
         tolerance_achive = False                            # 是否已经到达误差的容差
-        cluster_assment = np.zeros((data.shape[0],2))       # 保存聚类的信息矩阵，第一列为对应的聚类中心，第二维为离聚类中心的距离
+        cluster_assment = np.zeros((data.shape[0],2))       # 保存聚类的信息矩阵，第一列为对应的聚类中心，第二列为离聚类中心的距离
         center_dist = np.zeros((data.shape[0],self.k_))     # 保存每个点到每个聚类中心的距离
 
         while num_iter < self.max_iter_ and (not tolerance_achive):
 
             for center_index in range(self.k_):
                 diff = data - self.centers[center_index,:]
-                diff = np.sqrt(np.sum(np.square(diff),axis=1))
+                diff = np.sqrt(np.sum(np.square(diff),axis=1))   # 求所有点到中心点的距离
                 center_dist[:,center_index] = diff.reshape(data.shape[0])
 
 
-            min_dist_index = np.argmin(center_dist,axis=1)
-            dist = np.min(center_dist,axis=1)
+            min_dist_index = np.argmin(center_dist,axis=1)  # 距离样本点最近的聚类中心点索引
+            dist = np.min(center_dist,axis=1)   # 每个样本点到最近聚类中心的距离
 
-            for point_index in range(data.shape[0]):
+            for point_index in range(data.shape[0]):  # 把上面的数据存储在一个矩阵中
                 cluster_assment[point_index,:] = min_dist_index[point_index],dist[point_index]
 
             tolerance_achive = True
@@ -50,7 +50,9 @@ class K_Means(object):
             num_iter += 1
 
 
-    def predict(self, p_datas):
+    def predict(self, p_datas):   
+        # 实际上K-Means训练的过程就是希望找到最优的簇中心点，
+        # 后面预测直接计算到中心点的最小距离即可认为是属于哪一类
         result = []
 
         center_dist = np.zeros((p_datas.shape[0],self.k_))
